@@ -1,5 +1,6 @@
 from enum import Enum
 from htmlnode import HTMLNode, LeafNode
+import re
 
 class TextType(Enum):
     TEXT = "text"
@@ -9,6 +10,13 @@ class TextType(Enum):
     LINK = "link"
     IMAGE = "image"
 
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
 
 class TextNode:
     def __init__(self, text: str, text_type: TextType, url: str = None):
@@ -37,3 +45,26 @@ def text_node_to_html_node(text_node: TextNode) ->LeafNode:
             return LeafNode("a", text_node.text, {"href" : text_node.url})
         case TextType.IMAGE:
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
+
+def block_to_block_type(block: str) ->BlockType:
+    if re.search(r"^#{1,6}\s", block):
+        return BlockType.HEADING
+    elif block.startswith("```\n") and block.endswith("```"):
+        return BlockType.CODE
+    elif block.startswith(">") and not re.search(r"\n(?!>)", block):
+        return BlockType.QUOTE
+    elif block.startswith("- ") and not re.search(r"\n(?!-\s)", block):
+        return BlockType.UNORDERED_LIST
+    elif block.startswith("1. "):
+        test = True
+        text = block.split("\n")
+        for i in range(0, len(text)):
+            if not text[i].startswith(str(i+1) + ". "):
+                test = False
+        if test:
+            return BlockType.ORDERED_LIST
+        else:
+            return BlockType.PARAGRAPH
+    else:
+        return BlockType.PARAGRAPH
+    

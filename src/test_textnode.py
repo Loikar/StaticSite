@@ -1,7 +1,7 @@
 import unittest
-from textnode import TextType, TextNode, text_node_to_html_node
+from textnode import TextType, BlockType, TextNode, text_node_to_html_node, block_to_block_type
 from htmlnode import HTMLNode, LeafNode
-from split import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
+from split import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -94,6 +94,58 @@ class TestTextNode(unittest.TestCase):
             TextNode(" can I get into looking at ", TextType.TEXT),
             TextNode("Porn", TextType.IMAGE, "boot.dev")
         ])
+
+    def test_markdown_split(self):
+        mark1 = """
+This is a **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        mark2 = """
+What's _wrong_ about enjoying some [Porn](boot.dev)?
+
+
+I have the best ![ideas](level.shitty) don't you think?
+"""
+        blocks1 = markdown_to_blocks(mark1)
+        blocks2 = markdown_to_blocks(mark2)
+        self.assertEqual(blocks1, ["This is a **bolded** paragraph", "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line", "- This is a list\n- with items"])
+        self.assertEqual(blocks2, ["What's _wrong_ about enjoying some [Porn](boot.dev)?", "I have the best ![ideas](level.shitty) don't you think?"])
+
+
+    def test_block_type(self):
+        block1 = "### heading with\nrandom crap"
+        block2 = """
+```
+Here is some
+code text ```
+"""
+        block3 = """
+> "Alas, poor yorick"
+> "Who cares, let's find some porn!"
+"""
+        block4 = """
+1. Porn
+2. _Dicks_
+3. Food
+"""
+        block5 = """
+- meh
+- w/e
+- ugh
+"""
+        block6 = "Just some normal text"
+        self.assertEqual(block_to_block_type(block1.strip()), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(block2.strip()), BlockType.CODE)
+        self.assertEqual(block_to_block_type(block3.strip()), BlockType.QUOTE)
+        self.assertEqual(block_to_block_type(block4.strip()), BlockType.ORDERED_LIST)
+        self.assertEqual(block_to_block_type(block5.strip()), BlockType.UNORDERED_LIST)
+        self.assertEqual(block_to_block_type(block6.strip()), BlockType.PARAGRAPH)
+
 
 if __name__ == "__main__":
     unittest.main()

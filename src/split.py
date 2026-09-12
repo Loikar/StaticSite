@@ -66,3 +66,11 @@ def text_to_textnodes(text):
     result = split_nodes_delimiter(result, "`", TextType.CODE)
     result = split_nodes_image(result)
     return split_nodes_link(result)
+
+def markdown_to_blocks(markdown):
+    sections = markdown.split("\n\n")
+    blocks = []
+    for i in sections:
+        if i:
+            blocks.append(i.strip())
+    return blocks
