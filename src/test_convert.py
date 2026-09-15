@@ -47,3 +47,12 @@ code text ```
         node4 = markdown_to_html_node(code)
         html4 = node4.to_html()
         self.assertEqual(html4, "<div><pre><code>Here is some\ncode text </code></pre></div>")
+
+    def test_title(self):
+        mark1 = """
+# Here's a **Bold Headline**
+
+A short article paragraph of _important_ text
+"""
+        title1 = extract_title(mark1)
+        self.assertEqual(title1, "# Here's a **Bold Headline**")

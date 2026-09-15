@@ -1,5 +1,6 @@
 import os
 import shutil
+from convert import generate_page
 
 def recurse_copy(curr_public_dir, curr_static_dir):
     curr_dir = os.listdir(curr_static_dir)
@@ -12,13 +13,14 @@ def recurse_copy(curr_public_dir, curr_static_dir):
             os.mkdir(next)
             recurse_copy(next, j)
 
-
 def main():
     public = os.path.abspath("public")
     shutil.rmtree(public)
     os.mkdir(public)
     static = os.path.abspath("static")
     recurse_copy(public, static)
+    template = os.path.abspath("template.html")
+    generate_page(os.path.abspath("content/index.md"), template, os.path.join(public, "index.html"))
 
 
 main()
